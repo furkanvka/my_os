@@ -69,13 +69,12 @@ _start:
 	This is a good place to initialize crucial processor state before the
 	high-level kernel is entered. It's best to minimize the early
 	environment where crucial features are offline.
-	
-	Initialize our own Global Descriptor Table (GDT) here instead of
-	relying on the provisional one set up by GRUB. We call into our C
-	implementation (gdt_init), which populates the GDT structures and then
-	calls gdt_flush below to load the table and reload all segment registers.
 	*/
 	call gdt_init
+
+
+
+	call idt_init
 
 	/*
 	Enter the high-level kernel. The ABI requires the stack is 16-byte
@@ -149,3 +148,11 @@ gdt_flush:
 	ret
 
 .size gdt_flush, . - gdt_flush
+
+.global idt_flush
+.type idt_flush, @function
+idt_flush:
+    mov 4(%esp), %eax   # idt_ptr adresi
+    lidt (%eax)         # IDT'yi işlemciye yükle
+    ret
+.size idt_flush, . - idt_flush
