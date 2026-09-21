@@ -12,3 +12,7 @@ os wikide bulunan bare bones tutoriol takip ettim cross compiler compile ettim v
 ### ikinci gün 20 - 09 - 2026
 
 global description table nedir ne işe yarar ne ögrendim implamente ettim gereksiz bir ai destegi aldım biraz tahatsız etti açıkçası aslında basit bir şekilde bir register içine gerekli bilgileri yazıyormuşuz jetonum geç düştü şimdi intrept table oluşturcam ve vga text base sistemle basit bir test sistemi yazma planım var bunu önden başlamak lazım
+
+### üçünçü gün 22 - 09 - 2026
+
+intrupt hangisinin teteiklenidigini ilk 32 için ekrana bastıran temel bir kod yazdım.Os hakkında daha çok şey ögreniyorum bu işin ne kadar zor olduguna dogru bazı temel öngörülerde elde ettim galiba neyse repo galiba artık bugün github yüklücem artık repoyu

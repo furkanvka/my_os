@@ -156,3 +156,85 @@ idt_flush:
     lidt (%eax)         # IDT'yi işlemciye yükle
     ret
 .size idt_flush, . - idt_flush
+
+.extern isr_handler
+
+.type isr_common_stub, @function
+isr_common_stub:
+    pusha                   # EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI sırayla stack'e itilir
+
+    mov %ds, %ax            # Veri segmentini kaydet
+    push %eax
+
+    mov $0x10, %ax          # Çekirdek veri segmentine geç (0x10)
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+
+    push %esp               # C fonksiyonuna registers struct işaretçisi olarak ESP'yi ilet
+    call isr_handler
+    add $4, %esp            # Stack'ten argümanı temizle
+
+    pop %eax                # Orijinal segmenti geri yükle
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+
+    popa                    # Genel amaçlı kayıtçıları geri yükle
+    add $8, %esp            # int_no ve err_code alanlarını stack'ten temizle
+    iret                    # Kesmeden dön (CS, EIP, EFLAGS CPU tarafından geri yüklenir)
+
+# Makrolar: Hata kodu üretmeyen kesmeler için sahte 0 itilir
+.macro ISR_NOERRCODE num
+.global isr\num
+.type isr\num, @function
+isr\num:
+    push $0
+    push $\num
+    jmp isr_common_stub
+.endm
+
+# CPU tarafından donanımsal hata kodu üretilen kesmeler
+.macro ISR_ERRCODE num
+.global isr\num
+.type isr\num, @function
+isr\num:
+    push $\num
+    jmp isr_common_stub
+.endm
+
+# 0 - 31 Arası İşlemci İstisnaları
+ISR_NOERRCODE 0
+ISR_NOERRCODE 1
+ISR_NOERRCODE 2
+ISR_NOERRCODE 3
+ISR_NOERRCODE 4
+ISR_NOERRCODE 5
+ISR_NOERRCODE 6
+ISR_NOERRCODE 7
+ISR_ERRCODE   8
+ISR_NOERRCODE 9
+ISR_ERRCODE   10
+ISR_ERRCODE   11
+ISR_ERRCODE   12
+ISR_ERRCODE   13
+ISR_ERRCODE   14
+ISR_NOERRCODE 15
+ISR_NOERRCODE 16
+ISR_ERRCODE   17
+ISR_NOERRCODE 18
+ISR_NOERRCODE 19
+ISR_NOERRCODE 20
+ISR_NOERRCODE 21
+ISR_NOERRCODE 22
+ISR_NOERRCODE 23
+ISR_NOERRCODE 24
+ISR_NOERRCODE 25
+ISR_NOERRCODE 26
+ISR_NOERRCODE 27
+ISR_NOERRCODE 28
+ISR_NOERRCODE 29
+ISR_ERRCODE   30
+ISR_NOERRCODE 31
