@@ -238,3 +238,32 @@ ISR_NOERRCODE 28
 ISR_NOERRCODE 29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
+
+# IRQ Makrosu: IRQ'lar donanımsal hata kodu üretmez, sahte 0 itilir.
+# Ardından IDT vektör numarası (32..47) itilir ve mevcut isr_common_stub'a atlanır.
+.macro IRQ irq_num, idt_num
+.global irq\irq_num
+.type irq\irq_num, @function
+irq\irq_num:
+    push $0
+    push $\idt_num
+    jmp isr_common_stub
+.endm
+
+# IRQ 0 - 15 (IDT 32 - 47 arası vektörler)
+IRQ 0, 32
+IRQ 1, 33
+IRQ 2, 34
+IRQ 3, 35
+IRQ 4, 36
+IRQ 5, 37
+IRQ 6, 38
+IRQ 7, 39
+IRQ 8, 40
+IRQ 9, 41
+IRQ 10, 42
+IRQ 11, 43
+IRQ 12, 44
+IRQ 13, 45
+IRQ 14, 46
+IRQ 15, 47

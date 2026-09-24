@@ -1,4 +1,6 @@
 #include "idt.h"
+#include "isr.h"
+#include "pic.h"
 
 struct idt_entry idt_entries[256];
 struct idt_ptr   idt_pointer;
@@ -17,8 +19,17 @@ void idt_init(void) {
     idt_pointer.limit = (sizeof(struct idt_entry) * 256) - 1;
     idt_pointer.base  = (uint32_t)&idt_entries;
 
+    // 1. Tabloyu temizle
     for (int i = 0; i < 256; i++) {
         idt_set_gate(i, 0, 0, 0);
     }
+
+    // 2. PIC'i remap et (IRQ'ları 0x20 ve 0x28'e taşı)
+    PIC_remap(0x20, 0x28);
+
+    // 3. İstisna ve IRQ kapılarını (0..47) IDT tablosuna doldur
+    isr_install();
+
+    // 4. Tablo hazır olduktan sonra lidt ile CPU'ya yükle
     idt_flush((uint32_t)&idt_pointer);
 }

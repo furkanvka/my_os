@@ -1,7 +1,8 @@
 #include "isr.h"
 #include "idt.h"
+#include "pic.h"
 
-// Assembly tarafındaki semboller
+// 0 - 31 CPU Exception Sembolleri
 extern void isr0(void);
 extern void isr1(void);
 extern void isr2(void);
@@ -35,8 +36,33 @@ extern void isr29(void);
 extern void isr30(void);
 extern void isr31(void);
 
+// 32 - 47 IRQ Sembolleri 
+extern void irq0(void);
+extern void irq1(void);
+extern void irq2(void);
+extern void irq3(void);
+extern void irq4(void);
+extern void irq5(void);
+extern void irq6(void);
+extern void irq7(void);
+extern void irq8(void);
+extern void irq9(void);
+extern void irq10(void);
+extern void irq11(void);
+extern void irq12(void);
+extern void irq13(void);
+extern void irq14(void);
+extern void irq15(void);
+
+// C tarafında dinamik atanabilen işleyiciler tablosu
+static isr_t interrupt_handlers[256];
+
+void register_interrupt_handler(uint8_t n, isr_t handler) {
+    interrupt_handlers[n] = handler;
+}
+
 void isr_install(void) {
-    // 0x08 = Kernel Code Segment, 0x8E = Present, Ring 0, 32-bit Interrupt Gate
+    // 0 - 31 CPU Exceptions (0x08 = Kernel Code, 0x8E = 32-bit Interrupt Gate)
     idt_set_gate(0,  (uint32_t)isr0,  0x08, 0x8E);
     idt_set_gate(1,  (uint32_t)isr1,  0x08, 0x8E);
     idt_set_gate(2,  (uint32_t)isr2,  0x08, 0x8E);
@@ -69,69 +95,66 @@ void isr_install(void) {
     idt_set_gate(29, (uint32_t)isr29, 0x08, 0x8E);
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8E);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8E);
+
+    // 32 - 47 Donanım Kesmeleri (IRQs)
+    idt_set_gate(32, (uint32_t)irq0,  0x08, 0x8E);
+    idt_set_gate(33, (uint32_t)irq1,  0x08, 0x8E);
+    idt_set_gate(34, (uint32_t)irq2,  0x08, 0x8E);
+    idt_set_gate(35, (uint32_t)irq3,  0x08, 0x8E);
+    idt_set_gate(36, (uint32_t)irq4,  0x08, 0x8E);
+    idt_set_gate(37, (uint32_t)irq5,  0x08, 0x8E);
+    idt_set_gate(38, (uint32_t)irq6,  0x08, 0x8E);
+    idt_set_gate(39, (uint32_t)irq7,  0x08, 0x8E);
+    idt_set_gate(40, (uint32_t)irq8,  0x08, 0x8E);
+    idt_set_gate(41, (uint32_t)irq9,  0x08, 0x8E);
+    idt_set_gate(42, (uint32_t)irq10, 0x08, 0x8E);
+    idt_set_gate(43, (uint32_t)irq11, 0x08, 0x8E);
+    idt_set_gate(44, (uint32_t)irq12, 0x08, 0x8E);
+    idt_set_gate(45, (uint32_t)irq13, 0x08, 0x8E);
+    idt_set_gate(46, (uint32_t)irq14, 0x08, 0x8E);
+    idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
 }
 
-
-#include "isr.h"
-#include "idt.h"
-
-// 0 - 31 arası standart x86 istisna açıklamaları
 static const char *exception_messages[32] = {
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
-    "Coprocessor Fault",
-    "Alignment Check",
-    "Machine Check",
-    "SIMD Floating-Point Exception",
-    "Virtualization Exception",
-    "Control Protection Exception",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Hypervisor Injection Exception",
-    "VMM Communication Exception",
-    "Security Exception",
-    "Reserved"
+    "Division By Zero", "Debug", "Non Maskable Interrupt", "Breakpoint",
+    "Into Detected Overflow", "Out of Bounds", "Invalid Opcode", "No Coprocessor",
+    "Double Fault", "Coprocessor Segment Overrun", "Bad TSS", "Segment Not Present",
+    "Stack Fault", "General Protection Fault", "Page Fault", "Unknown Interrupt",
+    "Coprocessor Fault", "Alignment Check", "Machine Check", "SIMD Floating-Point Exception",
+    "Virtualization Exception", "Control Protection Exception", "Reserved", "Reserved",
+    "Reserved", "Reserved", "Reserved", "Reserved", "Hypervisor Injection Exception",
+    "VMM Communication Exception", "Security Exception", "Reserved"
 };
 
-
-// VGA ekranına belirli bir satırdan kırmızı arkaplanla yazı yazma yardımcısı
 static void print_panic_line(int line, const char *str) {
     char *video_memory = (char *)0xB8000;
-    int offset = line * 80 * 2; // Her satır 80 karakter * 2 bayt
-    
+    int offset = line * 80 * 2;
     for (int i = 0; str[i] != '\0'; i++) {
         video_memory[offset + (i * 2)] = str[i];
-        video_memory[offset + (i * 2) + 1] = 0x4F; // Kırmızı arka plan, beyaz yazı
+        video_memory[offset + (i * 2) + 1] = 0x4F;
     }
 }
 
 void isr_handler(struct registers *r) {
-    
-    if (r->int_no < 32) {
-        print_panic_line(1, "Hata Turu:");
-        print_panic_line(2, exception_messages[r->int_no]);
-    } else {
-        print_panic_line(1, "Bilinmeyen Kesme!");
+    // 1. Durum: Donanım Kesmesi (IRQ 0 - 15)
+    if (r->int_no >= 32 && r->int_no <= 47) {
+        if (interrupt_handlers[r->int_no] != 0) {
+            interrupt_handlers[r->int_no](r);
+        }
+        // PIC'e işlem bitti sinyalini (EOI) ilet
+        PIC_sendEOI(r->int_no - 32);
+        return;
     }
 
+    // 2. Durum: CPU İstisnası (0 - 31)
+    if (r->int_no < 32) {
+        print_panic_line(1, "Kernel Panic: CPU Istisnasi");
+        print_panic_line(2, exception_messages[r->int_no]);
+    } else {
+        print_panic_line(1, "Kernel Panic: Tanimsiz Kesme!");
+    }
+
+    // İstisna durumunda sistemi güvenli biçimde durdur
     while (1) {
         __asm__ __volatile__("cli; hlt");
     }

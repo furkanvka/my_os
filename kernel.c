@@ -1,23 +1,24 @@
 #include "isr.h"
+#include "timer.h"
+#include "keyboard.h"
 
 void kernel_main(void) 
 {
-    // IDT girdilerine kapıları bağla
-    isr_install();
+    timer_init(100);     // 100 Hz zamanlayıcı
+    keyboard_init();     // Klavye dinleyicisi
+
+    // 2. CPU kesmelerini aç
+    __asm__ __volatile__("sti");
 
     char *video_memory = (char *) 0xB8000;
-    const char *str = "IDT ve ISR Hazir!";
-    
-    int i = 0;
-    while (str[i] != '\0') {
+    const char *str = "Zamanlayici ve Klavye Calisiyor. Tusa basin:";
+    for (int i = 0; str[i] != '\0'; i++) {
         video_memory[i * 2] = str[i];
-        video_memory[i * 2 + 1] = 0x07;
-        i++;
+        video_memory[i * 2 + 1] = 0x0A; // Yeşil yazı
     }
 
-    // --- TEST KISMI ---
-    // Bilerek bir 0'a bölme istisnası (ISR 0) fırlat:
-    __asm__ __volatile__("int $0");
-
-    while(1);
+    // Çekirdeğin sonlanmasını önle
+    while(1) {
+        __asm__ __volatile__("hlt"); // Kesme gelene kadar CPU'yu uyut (güç tasarrufu)
+    }
 }

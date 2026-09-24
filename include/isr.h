@@ -10,7 +10,10 @@ struct registers {
     uint32_t eip, cs, eflags, useresp, ss;           // İşlemci tarafından donanımsal itilenler
 } __attribute__((packed));
 
+typedef void (*isr_t)(struct registers *);
+
 void isr_install(void);
 void isr_handler(struct registers *r);
+void register_interrupt_handler(uint8_t n, isr_t handler);
 
 #endif
