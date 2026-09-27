@@ -16,3 +16,7 @@ global description table nedir ne işe yarar ne ögrendim implamente ettim gerek
 ### üçünçü gün 22 - 09 - 2026
 
 intrupt hangisinin teteiklenidigini ilk 32 için ekrana bastıran temel bir kod yazdım.Os hakkında daha çok şey ögreniyorum bu işin ne kadar zor olduguna dogru bazı temel öngörülerde elde ettim galiba neyse repo galiba artık bugün github yüklücem artık repoyu
+
+#### dördüncü gün 26 - 09 - 2026
+
+yapay zeka destegi ile vga yazı modunu aktif kullanabilen ufak bir shell yazdım. güzel bir ekleme oldu hem gerçek bir os gibi hissettiriyor. Havalı buldugum bazı şeyleri ekleme peşindeyim şu an

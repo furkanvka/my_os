@@ -3,4 +3,6 @@
 
 void keyboard_init(void);
 
+char kbd_getchar(void);
+
 #endif

@@ -7,13 +7,6 @@ static uint32_t timer_ticks = 0;
 static void timer_callback(struct registers *regs) {
     (void)regs;
     timer_ticks++;
-
-    // Doğrulama: Her 100 tick'te (1 saniyede bir)
-    if (timer_ticks % 100 == 0) {
-        char *video = (char *)0xB8000;
-        video[158] = (video[158] == '|') ? '/' : '|'; // Yanıp sönen imleç efekti
-        video[159] = 0x0F;
-    }
 }
 
 void timer_init(uint32_t frequency) {
