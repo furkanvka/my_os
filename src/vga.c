@@ -8,6 +8,12 @@ static int term_row = 0;
 static int term_col = 0;
 static uint8_t term_color = 0x07; // Siyah arka plan, açık gri yazı
 
+
+void update_color(unsigned char forecolour, unsigned char backcolour) {
+    term_color  = (backcolour << 4) | (forecolour & 0x0F);
+}
+
+
 static void update_hardware_cursor(void) {
     uint16_t pos = term_row * 80 + term_col;
     outb(0x3D4, 14);
@@ -15,6 +21,8 @@ static void update_hardware_cursor(void) {
     outb(0x3D4, 15);
     outb(0x3D5, (uint8_t)(pos & 0xFF));
 }
+
+
 
 void terminal_clear(void) {
     uint16_t blank = (term_color << 8) | ' ';
