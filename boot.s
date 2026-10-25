@@ -41,6 +41,8 @@ The linker script specifies _start as the entry point to the kernel and the
 bootloader will jump to this position once the kernel has been loaded. It
 doesn't make sense to return from this function as the bootloader is gone.
 */
+.global stack_bottom
+.global stack_top
 .section .text
 .global _start
 .type _start, @function
@@ -64,6 +66,9 @@ _start:
 	in assembly as languages such as C cannot function without a stack.
 	*/
 	mov $stack_top, %esp
+
+	push %ebx          # 2. parametre: multiboot info adresi
+    push %eax          # 1. parametre: magic (0x2BADB002)
 
 	/*
 	This is a good place to initialize crucial processor state before the

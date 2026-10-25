@@ -43,7 +43,7 @@ $(ISO_BIN): $(KERNEL_BIN) grub.cfg
 	rm -rf $(BINDIR)/isodir
 
 run: $(ISO_BIN)
-	qemu-system-i386 -cdrom $(ISO_BIN) -display sdl
+	qemu-system-i386 -cdrom $(ISO_BIN) -display sdl -m 64
 
 clean:
 	rm -rf $(BINDIR) *.o myos myos.iso
