@@ -8,9 +8,6 @@
 #define MAX_RAM_SIZE (512u * 1024u * 1024u)
 #define MAX_FRAMES   (MAX_RAM_SIZE / PAGE_SIZE)
 
-#define FREE 0
-#define USED 1
-
 typedef uint32_t pageframe_t;
 
 void pmm_init(multiboot_info_t *mbi);

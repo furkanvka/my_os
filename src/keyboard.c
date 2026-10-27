@@ -13,7 +13,6 @@ static const char kbd_us[128] = {
   '*',   0, ' '
 };
 
-// Ring buffer veri yapısı
 static char kbd_buffer[KBD_BUFFER_SIZE];
 static volatile uint16_t kbd_head = 0; // Kesmenin yazdığı yer
 static volatile uint16_t kbd_tail = 0; // Terminalin okuduğu yer

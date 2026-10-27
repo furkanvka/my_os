@@ -12,8 +12,6 @@ extern uint8_t text_start[],   text_end[];
 extern uint8_t rodata_start[], rodata_end[];
 extern uint8_t data_start[],   data_end[];
 extern uint8_t bss_start[],    bss_end[];
-
-// boot.s'te tanımlanan stack sınırları (.global olmalı)
 extern uint8_t stack_bottom[], stack_top[];
 
 // Basit string karşılaştırma fonksiyonu (strcmp)
@@ -155,7 +153,7 @@ static void print_memory_info(void)
     terminal_writestring("  .bss      : ");
     terminal_write_size((uint32_t)(bss_end - bss_start));
     terminal_writestring(" (frame_map: ");
-    terminal_write_size(MAX_FRAMES);
+    terminal_write_size(MAX_FRAMES / 8);
     terminal_writestring(")\n");
 
     print_section("    stack   : ", stack_bottom, stack_top);
